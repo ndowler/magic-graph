@@ -61,24 +61,44 @@ Edge weights scale with specificity — a named combo outweighs a tribal match, 
 
 ## Getting started
 
-> ⚠️ **Status:** Early development. The repository currently contains the product spec ([`PRD.md`](./PRD.md)) and this README; the app implementation is in progress.
+> ⚠️ **Status:** Early development (milestones M0–M4). The decklist parser, Scryfall resolver, interaction engine, graph model, and an interactive UI are in place and unit-tested. Sharing/accounts (M5) and further polish (M6) are still to come.
 
-The proposed stack:
+The stack:
 
-- **Frontend:** React + TypeScript with a force-directed graph library (`react-force-graph` / Cytoscape.js / `d3-force`).
-- **Card data:** [Scryfall](https://scryfall.com/docs/api) bulk data + per-card API, cached locally.
-- **Engine:** pure TypeScript rule modules, runnable in the browser.
-
-Once scaffolding lands, the dev flow will look like:
+- **Frontend:** React + TypeScript (Vite) with [`react-force-graph-2d`](https://github.com/vasturiano/react-force-graph) for the force-directed graph.
+- **Card data:** [Scryfall](https://scryfall.com/docs/api) `/cards/collection` API, cached in `localStorage`.
+- **Engine:** pure TypeScript rule modules in [`src/lib/engine/`](./src/lib/engine), runnable in the browser and fully unit-tested.
 
 ```bash
 git clone https://github.com/ndowler/magic-graph.git
 cd magic-graph
 npm install
-npm run dev      # start the local dev server
+npm run dev        # start the local dev server (http://localhost:5173)
+npm test           # run the unit tests (parser + engine + graph)
+npm run build      # typecheck + production build
 ```
 
-(Commands above are illustrative and will be finalized with the first implementation milestone.)
+> **Network note:** the app fetches card data live from `api.scryfall.com`. In a sandboxed environment with an outbound-network allowlist, add that host to the allowlist or the deck import will fail with a 403. Tests and the build do **not** require network access (they inject a fetch stub / synthetic cards).
+
+### Project layout
+
+```
+src/
+  types.ts              # core domain types (Card, Edge, GraphModel, …)
+  lib/
+    parseDecklist.ts    # raw decklist text → structured entries
+    scryfall.ts         # Scryfall client + cache
+    resolver.ts         # decklist → resolved Cards
+    graph.ts            # graph model, metrics, cohesion, fit score
+    colors.ts           # color/edge styling
+    engine/
+      features.ts       # oracle-text feature extraction
+      rules.ts          # the interaction rule modules
+      combos.ts         # curated combo database
+      weights.ts        # per-type edge weights
+      index.ts          # analyzeCards / analyzeCandidate
+  components/           # DeckInput, GraphView, SidePanel, Insights, AddCard
+```
 
 ---
 
