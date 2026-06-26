@@ -27,7 +27,7 @@ A Commander deck is 100 singleton cards, and its strength is the **web of intera
 - **Add-a-card simulation** — search any card and see it appear as a *ghost node* with a **Fit Score (0–100)** showing how well it connects.
 - **Insights** — ranked lists of your most- and least-connected cards, orphan detection, and a deck-wide **Cohesion Score**.
 - **Tunable view** — sensitivity slider to cut noise, filters per interaction type, and cluster coloring for sub-engines (aristocrats, tokens, etc.).
-- **No account needed** — decks save locally; share a read-only link when you want to.
+- **No account needed** — your last deck is saved locally and reopens automatically, and a **Copy share link** button hands you a read-only `#deck=…` URL that rebuilds the graph for whoever opens it.
 
 ---
 
@@ -61,7 +61,7 @@ Edge weights scale with specificity — a named combo outweighs a tribal match, 
 
 ## Getting started
 
-> ⚠️ **Status:** Early development (milestones M0–M4). The decklist parser, Scryfall resolver, interaction engine, graph model, and an interactive UI are in place and unit-tested. Sharing/accounts (M5) and further polish (M6) are still to come.
+> ⚠️ **Status:** Early development (milestones M0–M5). The decklist parser, Scryfall resolver, interaction engine, graph model, an interactive UI, and local save + read-only share links are in place and unit-tested. Server-side accounts and further polish (M6) are still to come.
 
 The stack:
 
@@ -90,6 +90,7 @@ src/
     scryfall.ts         # Scryfall client + cache
     resolver.ts         # decklist → resolved Cards
     graph.ts            # graph model, metrics, cohesion, fit score
+    share.ts            # deck persistence + read-only share links
     colors.ts           # color/edge styling
     engine/
       features.ts       # oracle-text feature extraction
@@ -128,7 +129,7 @@ MagicGraph accepts the common export formats, e.g.:
 | M2 | Force-directed graph + click-to-inspect |
 | M3 | Add-a-card ghost nodes + Fit Score |
 | M4 | Insights: hubs / cuts / orphans + cohesion metrics |
-| M5 | Local save + shareable links |
+| M5 | Local save + shareable links ✅ |
 | M6 | Sensitivity/filters, accessibility, performance |
 
 See [`PRD.md`](./PRD.md) for details, the data model, and open questions.

@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Card, FitResult, GraphNode, InteractionType } from "./types";
 import { parseDecklist } from "./lib/parseDecklist";
 import { resolveDeck } from "./lib/resolver";
 import { resolveSingle } from "./lib/scryfall";
 import { buildGraph, computeFit } from "./lib/graph";
 import { INTERACTION_LABELS } from "./lib/colors";
+import { buildShareUrl, initialDeck, saveDeckLocally } from "./lib/share";
 import { DeckInput } from "./components/DeckInput";
 import { GraphView } from "./components/GraphView";
 import { SidePanel } from "./components/SidePanel";
@@ -27,6 +28,7 @@ export function App() {
   const [ghost, setGhost] = useState<
     { node: GraphNode; links: { source: string; target: string }[] } | null
   >(null);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
 
   const graph = useMemo(() => (cards.length ? buildGraph(cards) : null), [cards]);
 
@@ -35,6 +37,7 @@ export function App() {
     setError(null);
     setSelected(null);
     setGhost(null);
+    setShareMsg(null);
     try {
       const parsed = parseDecklist(raw);
       const resolved = await resolveDeck(parsed);
@@ -43,11 +46,36 @@ export function App() {
       setCards(resolved.cards);
       if (resolved.cards.length === 0) {
         setError("No cards could be resolved from that list.");
+      } else {
+        saveDeckLocally(raw);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to analyze deck.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  // On first load, open a shared deck (#deck=…) or the last locally saved one.
+  useEffect(() => {
+    const raw = initialDeck(window.location.hash);
+    if (raw) void handleAnalyze(raw);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleShare() {
+    if (!cards.length) return;
+    const url = buildShareUrl(cards, window.location.href);
+    try {
+      window.history.replaceState(null, "", url);
+    } catch {
+      /* ignore history failures (e.g. sandboxed iframe) */
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareMsg("Link copied to clipboard");
+    } catch {
+      setShareMsg("Share link added to the address bar");
     }
   }
 
@@ -102,6 +130,23 @@ export function App() {
           onAnalyze={handleAnalyze}
         />
         {graph && <AddCard onSearch={handleSearch} onAdd={handleAdd} disabled={loading} />}
+        {graph && (
+          <div className="panel">
+            <h2>Share</h2>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Copy a read-only link to this graph. Your deck is also saved locally
+              and reopens automatically next time.
+            </p>
+            <button className="secondary" onClick={handleShare} disabled={loading}>
+              Copy share link
+            </button>
+            {shareMsg && (
+              <p className="muted" style={{ marginTop: 8 }}>
+                {shareMsg}
+              </p>
+            )}
+          </div>
+        )}
         {graph && <SidePanel node={selected} graph={graph} onSelect={setSelected} />}
       </aside>
 
