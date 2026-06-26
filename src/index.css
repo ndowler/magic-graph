@@ -126,3 +126,20 @@ button:disabled { opacity: 0.5; cursor: default; }
   display: flex; align-items: center; justify-content: center;
   height: 100%; color: var(--muted); text-align: center; padding: 24px;
 }
+
+.badge-ro {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 6px;
+  padding: 2px 7px;
+}
+
+/* Saved-deck list: name loads on click, ✕ deletes. */
+.saved-decks { margin-top: 12px; }
+.saved-decks li { align-items: center; }
+.saved-decks .deck-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-decks .link-btn {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  padding: 2px 6px; font-size: 13px; font-weight: 700; flex: 0 0 auto; border-radius: 4px;
+}
+.saved-decks .link-btn:hover { color: #ff6b6b; background: var(--panel); }
+.saved-decks li:hover { background: var(--panel-2); }

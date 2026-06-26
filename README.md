@@ -61,7 +61,7 @@ Edge weights scale with specificity — a named combo outweighs a tribal match, 
 
 ## Getting started
 
-> ⚠️ **Status:** Early development (milestones M0–M4). The decklist parser, Scryfall resolver, interaction engine, graph model, and an interactive UI are in place and unit-tested. Sharing/accounts (M5) and further polish (M6) are still to come.
+> ⚠️ **Status:** Early development (milestones M0–M5). The decklist parser, Scryfall resolver, interaction engine, graph model, an interactive UI, and local save + shareable links are in place and unit-tested. Final polish (M6) is still to come.
 
 The stack:
 
@@ -90,6 +90,7 @@ src/
     scryfall.ts         # Scryfall client + cache
     resolver.ts         # decklist → resolved Cards
     graph.ts            # graph model, metrics, cohesion, fit score
+    share.ts            # local save + URL-encoded shareable links
     colors.ts           # color/edge styling
     engine/
       features.ts       # oracle-text feature extraction
@@ -97,7 +98,7 @@ src/
       combos.ts         # curated combo database
       weights.ts        # per-type edge weights
       index.ts          # analyzeCards / analyzeCandidate
-  components/           # DeckInput, GraphView, SidePanel, Insights, AddCard
+  components/           # DeckInput, GraphView, SidePanel, Insights, AddCard, SharePanel
 ```
 
 ---
