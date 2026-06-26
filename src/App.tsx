@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Card, FitResult, GraphNode, InteractionType } from "./types";
 import { parseDecklist } from "./lib/parseDecklist";
 import { resolveDeck } from "./lib/resolver";
 import { resolveSingle } from "./lib/scryfall";
 import { buildGraph, computeFit } from "./lib/graph";
 import { INTERACTION_LABELS } from "./lib/colors";
+import { buildShareUrl, loadSavedDeck, readDeckFromHash, saveDeck } from "./lib/share";
 import { DeckInput } from "./components/DeckInput";
 import { GraphView } from "./components/GraphView";
 import { SidePanel } from "./components/SidePanel";
@@ -14,6 +15,7 @@ import { AddCard } from "./components/AddCard";
 const ALL_TYPES = Object.keys(INTERACTION_LABELS) as InteractionType[];
 
 export function App() {
+  const [rawText, setRawText] = useState("");
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +33,7 @@ export function App() {
   const graph = useMemo(() => (cards.length ? buildGraph(cards) : null), [cards]);
 
   async function handleAnalyze(raw: string) {
+    setRawText(raw);
     setLoading(true);
     setError(null);
     setSelected(null);
@@ -43,6 +46,10 @@ export function App() {
       setCards(resolved.cards);
       if (resolved.cards.length === 0) {
         setError("No cards could be resolved from that list.");
+      } else {
+        // Persist for next visit and keep the URL a live, shareable link.
+        saveDeck(raw);
+        window.history.replaceState(null, "", buildShareUrl(raw));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to analyze deck.");
@@ -50,6 +57,17 @@ export function App() {
       setLoading(false);
     }
   }
+
+  // On first load, restore a deck from a shared link (priority) or local save.
+  useEffect(() => {
+    const restored = readDeckFromHash(window.location.hash) ?? loadSavedDeck();
+    if (restored && restored.trim()) {
+      setRawText(restored);
+      void handleAnalyze(restored);
+    }
+    // Mount-only: restoration should run exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSearch(name: string): Promise<FitResult | null> {
     if (!graph) return null;
@@ -95,6 +113,8 @@ export function App() {
 
       <aside className="left">
         <DeckInput
+          value={rawText}
+          onChange={setRawText}
           loading={loading}
           error={error}
           warnings={warnings}
