@@ -12,6 +12,8 @@ import { SidePanel } from "./components/SidePanel";
 import { Insights } from "./components/Insights";
 import { AddCard } from "./components/AddCard";
 import { SharePanel } from "./components/SharePanel";
+import { DeckDoctor } from "./components/DeckDoctor";
+import { rankAdditions } from "./lib/recommend";
 
 const ALL_TYPES = Object.keys(INTERACTION_LABELS) as InteractionType[];
 
@@ -113,6 +115,14 @@ export function App() {
     setCards((prev) => [...prev, { ...fit.card, isCommander: false }]);
   }
 
+  // Resolve a pasted maybeboard and rank each candidate's fit against the deck.
+  async function handleScoreAdditions(raw: string): Promise<FitResult[]> {
+    if (!graph) return [];
+    const parsed = parseDecklist(raw);
+    const resolved = await resolveDeck(parsed);
+    return rankAdditions(resolved.cards, graph).map((s) => s.fit);
+  }
+
   function toggleType(t: InteractionType) {
     setEnabledTypes((prev) => {
       const next = new Set(prev);
@@ -191,6 +201,13 @@ export function App() {
             <h2>Insights</h2>
             <p className="muted">Cohesion score, synergy hubs, and weak links appear here once you build a graph.</p>
           </div>
+        )}
+        {graph && (
+          <DeckDoctor
+            graph={graph}
+            onSelect={setSelected}
+            onScoreAdditions={handleScoreAdditions}
+          />
         )}
       </aside>
     </div>

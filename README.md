@@ -26,8 +26,9 @@ A Commander deck is 100 singleton cards, and its strength is the **web of intera
 - **Explainable edges** — every connection comes with a plain-English reason ("*Blood Artist* drains when *Sakura-Tribe Elder* sacrifices itself"), traced to a concrete rule — no black box.
 - **Add-a-card simulation** — search any card and see it appear as a *ghost node* with a **Fit Score (0–100)** showing how well it connects.
 - **Insights** — ranked lists of your most- and least-connected cards, orphan detection, and a deck-wide **Cohesion Score**.
+- **Deck Doctor** — actionable advice from the graph: ranked **cut candidates** (dead/thin cards), deck-wide observations (cohesion verdict, orphan share, hub over-reliance), and **swap suggestions** — paste a maybeboard and it ranks how well each card fits.
 - **Tunable view** — sensitivity slider to cut noise, filters per interaction type, and cluster coloring for sub-engines (aristocrats, tokens, etc.).
-- **No account needed** — decks save locally; share a read-only link when you want to.
+- **No account needed** — your last deck is saved locally and reopens automatically, and a **Copy share link** button hands you a read-only `#deck=…` URL that rebuilds the graph for whoever opens it.
 
 ---
 
@@ -91,6 +92,7 @@ src/
     resolver.ts         # decklist → resolved Cards
     graph.ts            # graph model, metrics, cohesion, fit score
     share.ts            # local save + URL-encoded shareable links
+    recommend.ts        # Deck Doctor: cut / add / swap recommendations
     colors.ts           # color/edge styling
     engine/
       features.ts       # oracle-text feature extraction
@@ -98,7 +100,7 @@ src/
       combos.ts         # curated combo database
       weights.ts        # per-type edge weights
       index.ts          # analyzeCards / analyzeCandidate
-  components/           # DeckInput, GraphView, SidePanel, Insights, AddCard, SharePanel
+  components/           # DeckInput, GraphView, SidePanel, Insights, AddCard, SharePanel, DeckDoctor
 ```
 
 ---
@@ -129,8 +131,11 @@ MagicGraph accepts the common export formats, e.g.:
 | M2 | Force-directed graph + click-to-inspect |
 | M3 | Add-a-card ghost nodes + Fit Score |
 | M4 | Insights: hubs / cuts / orphans + cohesion metrics |
-| M5 | Local save + shareable links |
+| M5 | Local save + shareable links ✅ |
 | M6 | Sensitivity/filters, accessibility, performance |
+
+Beyond the core milestones, a **Deck Doctor** panel turns the graph metrics into
+cut / add / swap recommendations. See [`FEATURE_SUGGESTIONS.md`](./FEATURE_SUGGESTIONS.md) for the broader idea backlog.
 
 See [`PRD.md`](./PRD.md) for details, the data model, and open questions.
 
